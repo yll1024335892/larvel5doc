@@ -1474,6 +1474,19 @@ return response()->json(Contact::all());
 return response()->json(Contact::all())->setCallback($request->input('callback'));
 return response()->json(['Tom','Jerry']);
 
+//自定义响应宏，一般是创建自定义的服务商，这里暂时放到AppServiceProvide中
+class AppServiceProvider{
+    ...
+    public function boot(){
+        Response::macro('myJson',function($content){
+            return response(json_encode($content))->headers(['ContentType'=>'application/json']);
+        });
+    }
+}
+//使用
+return response()->myJson(['name'=>'阿翼']);
+
+
 
 //以下内容作为参考
 //设置响应的内容
