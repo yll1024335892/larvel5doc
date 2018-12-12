@@ -84,7 +84,7 @@
                     <section class="cmd-description grid-item">
                       <h4><a name="artisan" href="#artisan">Artisan</a> <a href="javascript:" title="Artisan CLI @ Laravel Docs"><i class="icon-file-text"></i></a></h4>
                       <pre class="prettyprint lang-php">
-// 在版本 5.1.11 
+// 在版本 5.1.11
 php artisan make:policy PostPolicy
 // 针对命令显示帮助信息
 php artisan --help OR -h
@@ -642,29 +642,46 @@ DB::table('users')->where('votes', '>', 100)->lockForUpdate()->get();
 class User extends Model {}
 // 生成一个 Eloquent 模型
 php artisan make:model User
+
 // 指定一个自定义的数据表名称
 class User extends Model {
+//表名自动复数化MyUsers为my_users
   protected $table = 'my_users';
+//主键默认为id且是自增的，现在修改如下,$primaryKey默认自增
+protected $primaryKey='contact_id';
+//不想让其自增
+public $incrementing = false;
+//希望每张表都有created_at和updated_at时间戳列$timestamps为true,否则为false
+public $timestamps = false;
+//存储时间格式,$dateFormat的值会按照php的date()语法来解析，下面的是UNIX版本的秒来存储日期
+protected $dateFormat='U';
 }
+
           </pre>
 
           <h6>More</h6>
           <pre class="prettyprint lang-php">
+//插入数据
 Model::create(array('key' => 'value'));
-// 通过属性找到第一条相匹配的数据或创造一条新数据
+// 通过属性找到第一条相匹配的数据或创造一条新数据，会把实例持久到数据库并返回
 Model::firstOrCreate(array('key' => 'value'));
-// 通过属性找到第一条相匹配的数据或实例化一条新数据
+// 通过属性找到第一条相匹配的数据或实例化一条新数据，会返回但不会保存实例
 Model::firstOrNew(array('key' => 'value'));
 // 通过属性找到相匹配的数据并更新，如果不存在即创建
 Model::updateOrCreate(array('search_key' => 'search_value'), array('key' => 'value'));
 // 使用属性的数组来填充一个模型, 用的时候要小心「Mass Assignment」安全问题 !
 Model::fill($attributes);
 Model::destroy(1);
+//获取所有的数据
 Model::all();
+Model::get();
+//获取指定ID的数据
 Model::find(1);
+//获取查询的第一行数据
+ Model::first();
 // 使用双主键进行查找
 Model::find(array('first', 'last'));
-// 查找失败时抛出异常
+// 查找没有任何匹配时抛出异常
 Model::findOrFail(1);
 // 使用双主键进行查找, 失败时抛出异常
 Model::findOrFail(array('first', 'last'));
@@ -687,15 +704,85 @@ Model::all()->skip(10);
 // 默认的 Eloquent 排序是上升排序
 Model::all()->orderBy('column');
 Model::all()->orderBy('column','desc');
+
+//用chunk()进行响应分块
+Model::chunk(100,function($contacts){
+foreach($contacts as $contact){
+//对$contact进行操作
+}});
               </pre>
 
-              <h6>软删除 <a href="javascript:" title="Soft Deleting @ Laravel Docs"><i class="icon-file-text"></i></a></h6>
-              <pre class="prettyprint lang-php">
+    <h6>插入，更新，删除</h6>
+    <pre class="prettyprint lang-php">
+//插入一个新数据通过save()
+$contact=new Contact();
+$contact->name="阿翼";
+$contact->save();
+//或者
+$contact=new Contact([
+    'name'=>'阿翼'
+]);
+$contact->save();
+//或者
+$contact=Contact::create([
+    'name'=>'阿翼'
+]);
+
+//更新的原则是得到一个实例，改变属性然后保存
+$contact=Contact::find(1);
+$contact->name="阿翼互联网科技有限公司"
+$contact->save();
+//或者向update()传入数组以更新一条或多条Eloquent记录,key表示表中的字段名，value表示字段的值
+Contact::where('created_at','<',Carbon::now()->subYear())->update(['logevity'=>'ancient']);
+//或
+$contact=Contact::find(1);
+$contact->update(['logevity'=>'ancient']);
+
+//批量赋值
+class Contact{
+//可填充(白名单)
+    protected $fillable=['name','email'];
+//防护(不可以添加数据)
+    protected $guarded=['id','created_at','updated_at','owner_id'];
+        public function update(Contact $contact,Request $request){
+//没有对可插入的字段做限制的化，某些字段会插入我们并不想要的值
+        $contact->update($request->all());
+//通过$request->only('','',...)来过滤需要的数据
+        Contact::create($request->only('name','email'));
+    }
+}
+
+//普通删除
+$contact=Contact::find(5);
+$contact->delete();
+//或者
+Contact::destroy(1);
+//或
+Contact::destroy([1,5,7]);
+//删除查询的所有结果
+Contact::where('updated_at','<',Carbon::now()->subYear())->delete();
+
+//软删除
+//开启软删除1,在迁移中添加softDeletes，2,在模型中导入SoftDeletes特征,3,将deleted_at添加到$dates属性中
+Schema::table('contacts',function(Blueprint $table){
+        $table->softDeletes()
+});
+
+Class Contact extends Model{
+    use SoftDeletes;
+    protected $dates=['deleted_at'];
+}
+//在查询中添加上软删除条目
 Model::withTrashed()->where('cars', 2)->get();
-// 在查询结果中包括带被软删除的模型
+//使用trashed()方法来查看指定的实例是否已经被软删除
+if($contact->trashed()){
+//操作
+}
+// 在查询结果中包括带被软删除的模型，restore()恢复被软删除的数据
 Model::withTrashed()->where('cars', 2)->restore();
+//forceDelete()强制删除软删除的数据
 Model::where('cars', 2)->forceDelete();
-// 查找只带有软删除的模型
+// 查寻只带有软删除的模型
 Model::onlyTrashed()->where('cars', 2)->get();
               </pre>
 
@@ -979,16 +1066,22 @@ SSH::putString($string, $remotePath);
           <section class="cmd-description grid-item">
               <h4><a name="schema" href="#chema">Schema</a> <a href="javascript:" title="Schema Builder @ Laravel Docs"><i class="icon-file-text"></i></a></h4>
               <pre class="prettyprint lang-php">
+//创建迁移
+php artisan make:migration create_users_table
+//迁移中传递标志性内容--create = table_name和--table=_table_name_会将预修改迁移到现有的表中
+php artisan make:migration add_votes_to_users_table --table=users
+php artisan make:migration create_user_table --create=users
 // 创建指定数据表
-Schema::create('table', function($table)
+Schema::create('table', function(Blueprint $table)
 {
+//创建列
   $table->increments('id');
 });
 // 指定一个连接
 Schema::connection('foo')->create('table', function($table){});
 // 通过给定的名称来重命名数据表
 Schema::rename($from, $to);
-// 移除指定数据表
+// 删除指定数据表
 Schema::drop('table');
 // 当数据表存在时, 将指定数据表移除
 Schema::dropIfExists('table');
@@ -996,8 +1089,14 @@ Schema::dropIfExists('table');
 Schema::hasTable('table');
 // 判断数据表是否有该列
 Schema::hasColumn('table', 'column');
-// 更新一个已存在的数据表
-Schema::table('table', function($table){});
+//修改任何数表的列都需要必要的依赖doctrine/dbal包
+// 更新一个已存在的数据表列
+Schema::table('table', function(Blueprint $table){
+//将name的长度255修改为100
+    $table->string('name',100)->change();
+//设置字段为空
+    $table->string('deleted_at')->nullable->change();
+});
 // 重命名数据表的列
 $table->renameColumn('from', 'to');
 // 移除指定的数据表列
@@ -1011,6 +1110,7 @@ $table->string('name')->after('email');
               <h6>索引</h6>
               <pre class="prettyprint lang-php">
 $table->string('column')->unique();
+//使用了increments()则primary不是必须要有的
 $table->primary('column');
 // 创建一个双主键
 $table->primary(array('first', 'last'));
@@ -1024,6 +1124,7 @@ $table->index('column', 'key_name');
 // 创建一个双索引
 $table->index(array('first', 'last'));
 $table->index(array('first', 'last'), 'key_name');
+//删除索引dropPrimary和dropUnique
 $table->dropPrimary(array('column'));
 $table->dropPrimary('table_column_primary');
 $table->dropUnique(array('column'));
@@ -1032,29 +1133,35 @@ $table->dropIndex(array('column'));
 $table->dropIndex('table_column_index');
               </pre>
 
-              <h6>外键</h6>
+              <h6>添加和删除外键</h6>
               <pre class="prettyprint lang-php">
+//添加外键：这里为user_id列添加了一个外索引,也就是它引用了Users表中的id这一项
 $table->foreign('user_id')->references('id')->on('users');
 $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade'|'restrict'|'set null'|'no action');
 $table->foreign('user_id')->references('id')->on('users')->onUpdate('cascade'|'restrict'|'set null'|'no action');
+//删除一个索引，传入一个引用本地表的字段数组的方式来实现
 $table->dropForeign(array('user_id'));
+//删除一个索引，通过引用它的索引名（通过连接列名和引用的表名自动生成的方式来实现）
 $table->dropForeign('posts_user_id_foreign');
               </pre>
 
               <h6>字段类型</h6>
               <pre class="prettyprint lang-php">
 // 自增
+//自增主键会自动创建$table->primary('id')
 $table->increments('id');
 $table->bigIncrements('id');
 
-// 数字
+// 数字型字段
 $table->integer('votes');
 $table->tinyInteger('votes');
 $table->smallInteger('votes');
 $table->mediumInteger('votes');
 $table->bigInteger('votes');
 $table->float('amount');
+//长度15，保留小数点8位
 $table->double('column', 15, 8);
+//精度为5，数字范围为2
 $table->decimal('amount', 5, 2);
 
 // 字符串和文本
@@ -1071,24 +1178,51 @@ $table->dateTime('created_at');
 $table->time('sunrise');
 $table->timestamp('added_on');
 // Adds created_at and updated_at columns
-// 添加 created_at 和 updated_at 行
+// 添加 created_at 和 updated_at 行timestamps()nullableTimestamps()效果是一样
 $table->timestamps();
 $table->nullableTimestamps();
 
 // 其它类型
+//BLOB类型
 $table->binary('data');
 $table->boolean('confirmed');
 // 为软删除添加 deleted_at 字段
 $table->softDeletes();
+//添加一个uuid类型列(mysql中是CHAR(36))
 $table->enum('choices', array('foo', 'bar'));
-// 添加 remember_token 为 VARCHAR(100) NULL
+// 为用户remember me的令牌添加一个remember_token类型列VARCHAR(100)
 $table->rememberToken();
-// 添加整型的 parent_id 和字符串类型的 parent_type
+// 添加整型的 parent_id 和字符串类型的 parent_type用于多条关系
 $table->morphs('parent');
 ->nullable()
 ->default($value)
 ->unsigned()
               </pre>
+
+              <h6>建立额外属性</h6>
+              <pre class="prettyprint lang-php">
+//在mysql中email字段为空，将其放置在last_name字段后
+Schema::table('user',function(Blueprint $table){
+     $table->string('email')->nullable()->after('last_name');
+});
+//允许在列中插入NULL值
+ nullable()
+//在没有设置值时指定列中默认内容
+default('default content')
+//标记整形列为无符号型
+unsigned()
+//按顺序把列放置到首列(仅使用mysql)
+first()
+//按列顺序把列放到另外一列的后面(仅使用mysql)
+after('colName')
+//添加一个unique索引
+unique()
+//添加一个主键索引
+primary()
+//添加一个基本索引
+index()
+//备注：unique(),primary()和index()方法也可以在Fluent列创建环境以外使用
+               </pre>
 
               </section>
 
