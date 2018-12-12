@@ -2252,11 +2252,63 @@ $filtered = $collection->where('price', 100);
 $zipped = $collection->zip([100, 200]);
                 </pre>
               </section>
-                        <section class="cmd-description grid-item">
-                            <h4><a name="中间件" href="#中间件">中间件</a> <a href="javascript:" title="中间件使用"><i class="icon-file-text"></i></a></h4>
-                            <pre class="prettyprint lang-php">
-                                //开始
-                                  </pre>
+<section class="cmd-description grid-item">
+<h4><a name="middleware" href="#middleware">middleware</a> <a href="javascript:" title="中间件使用"><i class="icon-file-text"></i></a></h4>
+<pre class="prettyprint lang-php">
+//创建自定义中间件,app/Http/Middleware/BanDeleteMethod.php
+php artisan make:middleware BanDeleteMethod
+class BanDeleteMethod{
+//handle()方法代表输入请求和输出请求的过程
+    public function handle($request,Closure $next){
+        if($request->ip()==='192.168.1.1'){
+            return response('BANNED IP ADDRESS!',403);
+        }
+//禁止delete的方法
+    if($request->method()==='DELETE'){
+            return response('GET out of here with that delete method !',403);
+        }
+//$next()方法只接收$request,会继续下一个中间件的handle()的方法，直到没有更多中间件，最后该请求就可以达到应用程序了
+//返回的是这个请求经过栈中的每一个中间件
+//到达应用后，应用返回栈中的响应
+            $response= $next($request);
+//在响应返回用户前，可以再次与它进行交互
+            $response->cookie('visited-our-site',true);
+//最后将该响应返回给终端用户
+            return $response;
+    }
+}
+
+//绑定中间件,app/Http/Kernel.php中
+//绑定全局的中间件
+protected $middleware=[
+    ...
+    \App\Http\Middleware\BanDeleteMethod::class
+];
+//绑定路由中间件
+protected $routeMiddleware=[
+    ...
+    'nodelete'=>\App\Http\Middleware\BanDeleteMethod::class
+];
+//使用中间件
+Route::get('contacts',['middleware'=>'nodelete','users'=>'ContactsController@index']);
+Route::group(['prefix'=>'api','middleware'=>'nodelete',function(){
+    //素有路由一个API关联
+}]);
+//中间件传入参数
+Route::get('company',function(){
+    return view('company.admin');
+})->middleware('auth:owner');
+public function handle($request,$next,$role){
+    if(auth()->check() && auth()->user()->hasRole($role)){
+        return $next($request);
+    }
+    return redirect('login');
+}
+//有可能有多个参数的情况
+Route::get('company',function(){
+    return view('company.admin');
+})->middleware('auth:owner,view');
+</pre>
                         </section>
                         <section class="cmd-description grid-item">
                             <h4><a name="容器" href="#容器">容器</a> <a href="javascript:" title="容器"><i class="icon-file-text"></i></a></h4>
