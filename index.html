@@ -1224,6 +1224,21 @@ index()
 //备注：unique(),primary()和index()方法也可以在Fluent列创建环境以外使用
                </pre>
 
+              <h6>运行迁移</h6>
+              <pre class="prettyprint lang-php">
+//运行迁移
+php artisan migrate
+//运行迁移和填充
+php artisan migrate --seed
+//回滚运行当前安装下的每一个数据库迁移
+php artisan migrate:reset
+//回滚运行在当前安装下的每一个数据迁移，然后运行每一个可用的迁移。和migrate:reset然后migrate是一样的
+php artisan migrate:refresh
+//回滚刚刚运行的migrate的迁移或者添加选项--step=1且回滚指定的迁移次数
+php artisan migrate:rollback
+//显示列出每次迁移的列表，通过Y或者N来显示它是否在当前环境中运行
+php artisan migrate:status
+                   </pre>
               </section>
 
 <section class="cmd-description grid-item">
