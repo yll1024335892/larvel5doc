@@ -1358,9 +1358,10 @@ Session::keep(array('key1', 'key2'));
 <section class="cmd-description grid-item">
               <h4><a name="requests" href="#requests">Request</a> <a href="javascript:" title="Requests @ Laravel Docs"><i class="icon-file-text"></i></a></h4>
               <pre class="prettyprint lang-php">
+//用户的请求状态
 // url: http://xx.com/aa/bb
 Request::url();
-// 路径: /aa/bb
+// 访问界面的路径(不包括路径): /aa/bb
 Request::path();
 // 获取请求 Uri: /aa/bb/?c=d
 Request::getRequestUri();
@@ -1384,7 +1385,7 @@ Request::server('PATH_INFO');
 Request::ajax();
 // 判断请求是否使用 HTTPS
 Request::secure();
-// 获取请求方法
+// 获取请求方法(GET,POST,PATCH等)
 Request::method();
 // 判断请求方法是否是指定类型的
 Request::isMethod('post');
@@ -1397,6 +1398,49 @@ Request::isJson();
 // 判断 HTTP Accept 头部信息是否为 application/json
 Request::wantsJson();
               </pre>
+
+    <h4>基本用户输入</h4>
+    <pre class="prettyprint lang-php">
+//基本用户输入指通过GET，POST,JOSN得到的输入
+//返回所有用户输入内容的数组
+$request->all();
+//返回单个用户提供的输入字段的值
+$request->input(fieldName);
+//返回所有用户指定字段名的数组
+$request->only(fieldName | [array,of,filed,names]);
+//返回所有用户除了指定（字段名）的数组
+$request->except(fieldName | [array,of,filed,names]);
+//返回表示字段是否存在的布尔值
+$request->exists(fieldName);
+//返回表示该字段是否存在于输入中并且不为空（具有值）的布尔值
+$request->has(fieldName);
+//如果页面手动JOSN的输入，则返回ParameterBag,通过  $bag->get('name')获取
+$request->json();
+//根据键值返回页面接收的JSON数据的值
+$request->json(keyName);
+//ParameterBag,这个类就像一个关联数组，可以使用get()方法得到一个指定的键值
+echo $bag->get('name');
+//可以可以用has()方法判断键值是否存在，all()用来获取所有的键和值，count()用来获得条目数，key()用来获得只包含键的数组
+    </pre>
+    <h4>持久性</h4>
+    <pre class="prettyprint lang-php">
+//与会话交互的功能，大多数会话功能都存在别的地方，但是有一些特殊方法是与当前界面请求相关的
+//将当前请求的用户的输入暂存到稍后获取的会话中
+flash()
+//为提供数组的任何键值暂存当前请求用户的输入
+flashOnly()
+//为除提供数组外的任何键值暂存当前请求的用户输入
+flashExcept()
+//返回所有之前暂存的用户输入的数组，如果传入了一个键值，则返回暂存数据里对应该键值的值
+old()
+//删除所有之前暂存的用户输入
+flush()
+//从请求中获取所有的cookie,如果指定了键值，则只获取对应的cookie
+cookie()
+//返回表示请求在给定键值时是否包含cookie的布尔值
+hasCookie()
+//备注：flash*()和old()方法是用来存储用户输入和稍后获取用户输入，其通常位于通过验证和拒绝输入后
+    </pre>
 
               </section>
 
