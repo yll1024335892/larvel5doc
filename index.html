@@ -1756,6 +1756,124 @@ return new FooValidator($translator, $data, $rules, $msgs);
 
               <h6>Rules</h6>
               <pre class="prettyprint lang-php">
+//验证字段必须为yes，on，1或true。 这有助于验证“服务条款”的接受程度。
+Accepted
+//DNS的A(ip: An IPv4 addresses in dotted decimal notation.)类型或者AAAA(ipv6: IPv6 address)类型
+Active_URL
+//将日期传到strtotime中
+After (Date)   如:after:tomorrow
+After_Or_Equal (Date)
+//必须全是字母
+Alpha
+//可能包含数字，字母或者下划线
+Alpha_Dash
+//必须完全是数字和字符
+Alpha_Numeric
+//验证字段必须是php的Array
+Array
+//第一次失败停止运行验证规则
+Bail
+Before (Date)
+Before_Or_Equal (Date)
+//规则:between:min,max
+Between
+//必须是false,true,1,0,'0','1'
+Boolean
+//验证字段必须具有foo_confirmation,如验证密码password和password_confirmation
+Confirmed
+//根据strtotime验证的是有效日期
+Date
+//验证字段必须等于给定的日期
+Date_Equals:date
+//验证字段与给定格式匹配
+Date_Format:date或者 Date_Format:format
+//具有和字段不同的值
+Different:field
+//确切的数字长度
+Digits:value
+//给定的数字长度在min和max之间
+digits_between:min,max
+//指定规范的约束图片的尺寸可用值min_width, max_width, min_height, max_height, width, height, ratio
+dimensions (Image Files)，举例:dimensions:min_width=100,min_height=200或dimensions:ratio=3/2
+//使用数组时，里面不包含任何重复的数据
+distinct
+//验证格式化的邮件形式
+email
+//验证字段必须存在于给定的数据库表中,未指明column就用第一个名称table名称来表示
+exists:table,column举例:exists:states或者exists:states,abbreviation或用于特定数据库中exists:connection.staff,email用点语法表示
+//验证字段必须是成功上传的文件
+file
+//验证字段存在时不为空
+filled
+Greater Than
+Greater Than Or Equal
+//验证图片必须是jpeg,png,bmp,gif或者svg
+image
+//验证值必须是给定值的列表中
+in举例:in:one,true,three,...
+//验证字段必须存在于另一个字段的值中
+in_array规范:in_array:anotherfield.*
+//验证字段必须是整数
+integer
+//验证字段必须是ip地址
+ip
+ipv4
+ipv6
+//验证数据必须是有效的json字符串
+json
+//验证字段必须小于给定字段，这两个字段必须属于同一类型，字符串，数字，数组和文件
+lt:field
+//验证字段必须小于或等于给定字段（同一类型）
+lte:field
+//验证字段必须小于或等于最大值
+max:value
+//验证中的文件必须与给定的MIME类型之一匹配
+mimetypes:text/plain,... 举例:mimetypes:video/avi,video/mpeg,video/quicktime
+//验证中的文件必须具有列出的扩展名之一相对应的MIME类型
+mimes:foo,bar,... 举例:mimes:jpeg,bmp,png
+min:value
+not_in:foo,bar,...
+//验证与正则表单式不匹配
+not_regex:pattern 举例:not_regex:/^.+$/i
+//验证字段可能为空
+nullable
+//验证字段必须是数字
+numeric
+//验证字段必须存在于输入数据中，但可以为空
+present
+//验证匹配正则
+regex:pattern举例验证email的表示regex:/^.+@.+$/i
+//验证字段必须存在于输入数据中而不是空的,以下是为空的情况1，值为null;2,值为空字符串;3,值为空数组或空Countable对象;4,该值没有路径上传文件
+required
+//如果antherfield字段等于任何值，则验证字段必须存在且不为空
+required_if:anotherfield,value,...
+//除非antherfield字段等于任何值，否则验证字段必须存在且不为空
+required_unless:anotherfield,value,...
+//验证字段必须存在且仅在存在任何其它指定字段时才为空
+required_with:foo,bar,...
+//验证字段必须存在，并且仅当存在所有其他指定字段时才为空。
+required_with_all:foo,bar,...
+//验证字段必须存在，并且仅当不存在任何其他指定字段时才为空。
+required_without:foo,bar,...
+//验证字段必须存在，并且仅当不存在所有其他指定字段时才为空。
+required_without_all:foo,bar,...
+//给定字段必须与验证字段匹配。
+same:field
+size:value
+//以给定值其中之一开头
+starts_with:foo,bar,...
+//必须是字符串且不为空
+string
+//验证字段必须是有效的时区标识符
+timezone
+//验证字段在给定的数据库表中是唯一的，如果未指定列选项，则使用字段名称
+unique:table,column,except,idColumn举例:unique:users,email_address和连接其它库unique:connection.users,email_address
+//字段必须是有效的url
+url
+//The field under validation must be a valid RFC 4122 (version 1, 3, 4, or 5) universally unique identifier (UUID).
+UUID
+
+//原有的
 accepted
 active_url
 after:YYYY-MM-DD
