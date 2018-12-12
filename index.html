@@ -1447,15 +1447,48 @@ hasCookie()
 <section class="cmd-description grid-item">
               <h4><a name="responses" href="#responses">Response</a> <a href="javascript:" title="Responses @ Laravel Docs"><i class="icon-file-text"></i></a></h4>
               <pre class="prettyprint lang-php">
+//简单的HTTP响应
+Route::get('route',function(){
+    return new Illuminate\Http\Response('Hello!');
+});
+Route::get('route',function(){
+    return response('Hello !');
+})
+//自定义状态和表头的简单HTTP响应
+Route::get('route',function(){
+    return response('Error!',400)->header('X-Header-Name','header-value')->cookie('cookie-name','cookie-value');
+});
+//添加cookie
+return response($content)->cookie('signup_dismissed',true);
+//视图响应
+Route::get('/',function(XmlGetterService $xml){
+    $data=$xml->get();
+    return response()->view('xml-structure',$data)->header('Content-Type','text/xml');
+});
+//文件下载响应第一个参数文件路径，第二个参数重命名，第三个参数是header信息
+return response()->download('file.csv','export.csv',['header'=>'value']);
+//文件响应
+return response()->file('./invoices/xx.pdf',['header'=>'value']);
+//JSON响应，将传入的数组转换为JSON(通过json_encode()),并将Content-Type设置为application/json.同时海可以使用setCallback()方法来创建一个JSONP响应，而不是JSON响应
+return response()->json(Contact::all());
+return response()->json(Contact::all())->setCallback($request->input('callback'));
+return response()->json(['Tom','Jerry']);
+
+
+//以下内容作为参考
+//设置响应的内容
 return Response::make($contents);
+//设置响应的HTTP状态
 return Response::make($contents, 200);
 return Response::json(array('key' => 'value'));
 return Response::json(array('key' => 'value'))
 ->setCallback(Input::get('callback'));
+//下载响应
 return Response::download($filepath);
 return Response::download($filepath, $filename, $headers);
 // 创建一个回应且修改其头部信息的值
 $response = Response::make($contents, 200);
+//自定义表头
 $response->header('Content-Type', 'application/json');
 return $response;
 // 为回应附加上 cookie
