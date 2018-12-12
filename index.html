@@ -1502,7 +1502,13 @@ return Response::make($content)
               <h4><a name="redirects" href="#redirects">Redirect</a> <a href="javascript:" title="Redirects @ Laravel Docs"><i class="icon-file-text"></i></a></h4>
               <pre class="prettyprint lang-php">
 return Redirect::to('foo/bar');
+//将暂存数据重定向到会话中with
 return Redirect::to('foo/bar')->with('key', 'value');
+//使用with暂存的会话
+return redirect('dashboard')->with('message','Contact created');
+Route::get('dashboard',function(){
+    echo session('message');
+});
 return Redirect::to('foo/bar')->withInput(Input::get());
 return Redirect::to('foo/bar')->withInput(Input::except('password'));
 return Redirect::to('foo/bar')->withErrors($validator);
