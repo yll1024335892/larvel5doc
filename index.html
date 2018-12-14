@@ -1714,6 +1714,56 @@ $message->getSwiftMessage();
 <section class="cmd-description grid-item">
               <h4><a name="queues" href="#queues">Queue</a> <a href="javascript:" title="Queues @ Laravel Docs"><i class="icon-file-text"></i></a></h4>
               <pre class="prettyprint lang-php">
+<h6>创建任务</h6>
+php artisan make:job CrunchReports
+//生成的任务模型类
+class CrunchReports implements ShouldQueue{
+//引入如下特性，并实现ShouldQueue的接口，Queueable允许我们指定Laravel如果将任务推送到队列中，InteractsWithQueue允许每个任务在处理工程中控制其与队列的关系，包括删除队列或重新队列；
+//SerializesModels为任务提供序列化和反序列化Eloquent模型的能力 
+	use InteractsWithQueue,Queueable,SerializesModels;
+//构造函数将数据附加到任务中
+	public function __construct(){
+	
+	}
+//任务逻辑归属的地方(也是用来引入依赖项的方法签名)
+	public function handle(){
+
+	}
+}
+
+
+<h6>任务实例</h6>
+use App\ReportGenerator;
+use Illuminate/Log\Writer as Logger;
+class CrunchReports implements ShouldQueue{
+	use InteractsWithQueue,SerializesModels;
+	protected $user;
+	public function __construct($user){
+		$this->user=$user;
+	}
+	public function handle(ReportGenerator $generator,Looger $looger){
+		$generator->generateReportsForUser($this->user);
+		$looger->info('Generated reports.');
+	}
+}
+<h6>任务推送到队列中</h6>
+//将任务推送至队列，全局dispatch()助手和DispatchesJobs中trait提供的方法，它在每个控制器中是默认导入的
+//使用添加到队列中
+public function index(){
+	$user->auth()->user();
+	$this->dispatch(new \App\Jobs\CrunchReports($user));
+}
+dispatch(new \App\Jobs\CrunchReports($user));
+//自定义连接
+dispatch((new DoThingJob)->onConnection('redis'));
+//自定义队列(根据它们的重要性对队列进行区分,并将其命名为low或high),使用onQueue()处理
+dispatch((new DoThingJob)->onQueue('high'));
+//自定义延迟-使用delay()方法自定义等待时间
+//向队列工作者释放工作前，延迟1分钟
+dispatch((new DoThingJob)->delay(60));
+
+
+<h6>常用的方式整合</h6>
 Queue::push('SendMail', array('message' => $message));
 Queue::push('SendEmail@send', array('message' => $message));
 Queue::push(function($job) use $id {});
@@ -2442,12 +2492,6 @@ Route::get('company',function(){
     return view('company.admin');
 })->middleware('auth:owner,view');
 </pre>
-                        </section>
-                        <section class="cmd-description grid-item">
-                            <h4><a name="容器" href="#容器">容器</a> <a href="javascript:" title="容器"><i class="icon-file-text"></i></a></h4>
-                            <pre class="prettyprint lang-php">
-                                //开始
-                                  </pre>
                         </section>
 
 
