@@ -2491,6 +2491,9 @@ public function handle($request,$next,$role){
 Route::get('company',function(){
     return view('company.admin');
 })->middleware('auth:owner,view');
+
+//中间件路由的排除
+ $this->middleware('auth', ['except' => ['show']]);
 </pre>
                         </section>
 
